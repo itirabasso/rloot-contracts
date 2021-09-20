@@ -6,16 +6,23 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import {RLoot} from "./RLoot.sol";
-import {LootProperties} from "./LootProperties.sol";
 import "./WorkerBatch.sol";
+import "hardhat/console.sol";
 
-contract Looter is WorkerBatch {
-    using LootProperties for Looter;
+contract Raffle is Ownable, WorkerBatch {
+    struct WinnerData {
+        uint256 index;
+        address winner;
+    }
 
-    // owner => batchId => amount of requests
-    // mapping(address => mapping(uint256 => uint256)) public requests;
+    // batch id => participants addresses
     mapping(uint256 => address[]) public requests;
-    mapping(address => bool) public participated;
+    // account => batch id
+    mapping(address => uint256) public participated;
+    // batch id => winner data
+    mapping(uint256 => WinnerData) public winners;
+
+    bool public finalized;
 
     RLoot public lootNFT;
 
@@ -24,70 +31,99 @@ contract Looter is WorkerBatch {
 
     uint256 public MAX_REQUESTS_PER_BATCH = 5;
 
-    constructor(
-        address lootAddress,
-        address oracleAddress
         // uint256 cooldown,
         // uint256 fee
-    ) WorkerBatch(oracleAddress) {
+    constructor(address lootAddress, address oracleAddress)
+        WorkerBatch(oracleAddress)
+        Ownable()
+    {
         lootNFT = RLoot(lootAddress);
+        finalized = false;
     }
 
     /// user functions
-    
+
+    // revert when contract is finalizing?
     function buy(uint256 amount) external {
-        participated[msg.sender] = currentBatch;
+        // last participation is not current batch
+        // require(participated[msg.sender] < currentBatch, "already participated");
+        // set participation as current batch
+        // participated[msg.sender] = currentBatch;
+        // add to batch requests.
         requests[currentBatch].push(msg.sender);
+        // emit event 
         emit TicketSold(msg.sender, currentBatch, 1);
     }
 
-    function isWinner(address account, uint256 batchId, uint256 index) public view returns (bool) {
-        // seed % participants == number of ticket => winner
-        uint256 len = requests[batchId].length;
-        return batches[batchId].seed % requests[batchId].length == index;
+    // function isWinner(address account, uint256 batchId)
+    //     external
+    //     view
+    //     returns (bool)
+    // {
+    //     // no winner for this batch yet.
+    //     if (winners[batchId].winner == address(0)) {
+    //         return false;
+    //     }
+    //     return winners[batchId].winner == account;
+    // }
+
+    function fullfilJob(bytes32 requestId, uint256 randomness)
+        public
+        override
+        onlyOracle
+    {
+        // seed % amount of participants == index
+        winners[currentBatch].index = randomness % requests[currentBatch].length;
+        super.fullfilJob(requestId, randomness);
     }
 
     function claim(uint256 batchId, uint256 index) external {
-        require(
-            participated[msg.sender],
-            "you havent participated"
-        );
-        require(
-            requests[batchId][index] == msg.sender,
-            "wrong index"
-        );
-        require(
-            batches[batchId].seed != 0,
-            "batch not processed yet"
-        );
-        require(
-            isWinner(msg.sender, batchId, index),
-            "you are not the winner"
-        );
+        //
+        // require(participated[msg.sender] == batchId, "you havent participated");
+        // this index in this batch is the sender
+        require(requests[batchId][index] == msg.sender, "wrong index");
+        // the batch hasnt been 
+        require(batches[batchId].seed != 0, "batch not processed yet");
+        // it's processed => fetch batch winner
+        WinnerData storage winner = winners[batchId];
+        // winner index is correct
+        require(winner.index == index, "you are not the winner");
+        // winner is not set => hasnt been claimed
+        require(winner.winner == address(0), "already claimed");
+        // set the winner
+        winner.winner = msg.sender;
 
-        delete participated;
-        delete requests[batchId];
+        // we can skip this and just selfdestruct at some point in the future.
+        // delete requests[batchId];
+        // console.log("%d - %d", gasleft(), requests[batchId].length);
 
         emit WinnerClaim(msg.sender, batchId);
     }
 
- 
-
-    function batchGetRequests(address account, uint256[] memory batchIds)
-        external
-        view
-        returns (uint256[] memory)
-    {
-        require(batchIds.length > 0, "at least one batchId");
-
-        // allocate arrays memory
-        uint256[] memory ret = new uint256[](batchIds.length);
-
-        // get batches
-        for (uint256 i = 0; i < batchIds.length; i++) {
-            ret[i] = requests[account][batchIds[i]];
+    function findIndex(uint256 batchId, address account) external view returns (uint256 index) {
+        address[] memory participants = requests[batchId];
+        for (uint256 i = 0; i < participants.length; i++) {
+            if (participants[i] == account) {
+                return i;
+            }
         }
-        // return batches
-        return ret;
+        revert("not found");
     }
+
+    function getWinner(uint256 batchId) external view returns (WinnerData memory) {
+        return winners[batchId];
+    }
+
+    // admin functions 
+
+    // finalize after next process?
+    function finalize() external onlyOwner {
+        finalized = true;
+    }
+
+    function end() external onlyOwner {
+        require(finalized, "not finalized");
+        selfdestruct(payable(msg.sender));
+    }
+
 }
