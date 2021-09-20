@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "outDir": "dist",
+    "rootDir": "./",
+    /* Basic Options */
+    "target": "ES2019",
+    "module": "commonjs",
+    "lib": ["ESNext"],
+    /* Module Resolution Options */
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    /* Advanced Options */
+    // "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "./src/**/*.json",
+    "./artifacts/**/*.json",
+    "./scripts/**/*.json",
+    "./scripts/**/*",
+    "./test/**/*",
+    "./typechain/**/*"
+  ],
+  "files": [
+    "./hardhat.config.ts",
+    "./node_modules/@nomiclabs/hardhat-ethers/types/index.d.ts",
+    "./node_modules/@nomiclabs/hardhat-waffle/types/index.d.ts",
+    "./node_modules/@nomiclabs/hardhat-etherscan/types/index.d.ts"
+  ]
+}
