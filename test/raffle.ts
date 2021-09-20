@@ -25,12 +25,12 @@ import { BigNumber, Contract, Signer, Wallet } from "ethers";
 
 
 // const LINK_ADDRESS = '0xa36085F69e2889c224210F603D836748e7dC0088'
-// const LINK_ADDRESS = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709'
+const LINK_ADDRESS = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709'
 const BYTES32_ZEROS = '0x0000000000000000000000000000000000000000000000000000000000000000'
 
 // Mumbai
 // LINK Token
-const LINK_ADDRESS = '0x326C977E6efc84E512bB9C30f76E30c160eD06FB'
+// const LINK_ADDRESS = '0x326C977E6efc84E512bB9C30f76E30c160eD06FB'
 // VRF Coordinator	0x8C7382F9D8f56b33781fE506E897a4F1e2d17255
 // Key Hash	0x6e75b569a01ef56d18cab6a8e71e6600d6ce853834d4a5748b720d06f878b3a4
 // Fee	0.0001 LINK
@@ -90,7 +90,6 @@ describe("Raffle", function () {
 
     oracle = await Oracle.deploy(oracleFee)
     await oracle.deployed()
-
 
     await link.connect(deployer).transfer(oracle.address, oracleFee.mul(10))
     // loot = await Loot.deploy();
@@ -229,25 +228,25 @@ describe("Raffle", function () {
     await raffle.connect(winner).claim(1, winnerData.index)
   }).timeout(1000*60*15)
 
-  // it.only('self destruct', async function() {
-  //   const accounts = await createWallets(500)
-  //   const raffle = await newRaffle()
-  //   const times = 100
+  it.only('self destruct', async function() {
+    const accounts = await createWallets(500)
+    const raffle = await newRaffle()
+    const times = 100
     
-  //   for (let i; i < times; i++) {
-  //     // new raffle => batch 1
+    for (let i; i < times; i++) {
+      // new raffle => batch 1
       
-  //     // all the accounts buy one ticket
-  //     await Promise.all(accounts.map(acc => raffle.connect(acc).buy(1)))
-  //     // process batch
-  //     await processAndFulfill(raffle, deployer)
-  //   }
-  //   const b = await deployer.getBalance()
-  //   await raffle.connect(deployer).finalize()
-  //   await raffle.connect(deployer).end()
-  //   const ba = await deployer.getBalance()
-  //   console.log(formatEther(b.sub(ba)))
-  // }).timeout(1000*60*25)
+      // all the accounts buy one ticket
+      await Promise.all(accounts.map(acc => raffle.connect(acc).buy(1)))
+      // process batch
+      await processAndFulfill(raffle, deployer)
+    }
+    const b = await deployer.getBalance()
+    await raffle.connect(deployer).finalize()
+    await raffle.connect(deployer).end()
+    const ba = await deployer.getBalance()
+    console.log(formatEther(b.sub(ba)))
+  }).timeout(1000*60*25)
 
 
 
