@@ -5,9 +5,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Oracle.sol";
 
-// import "hardhat/console.sol";
+import "hardhat/console.sol";
 
-contract WorkerBatch is Ownable {
+contract WorkerBatch {
     struct BatchData {
         uint256 seed;
         bytes32 requestId;
@@ -23,7 +23,7 @@ contract WorkerBatch is Ownable {
     // uint256 internal _cooldown;
     // uint256 internal _lastProcessTime;
 
-    Oracle public oracle;
+    Oracle private _oracle;
 
     event BatchProcessed(uint256 batchId);
 
@@ -31,11 +31,12 @@ contract WorkerBatch is Ownable {
         address oracleAddress
         // uint256 cooldown,
         // uint256 fee
-    ) Ownable() {
-        currentBatch = 0;
-        nextBatchId = 0;
+    ) {
+        currentBatch = 1;
+        nextBatchId = 2;
         newBatch();
-        oracle = Oracle(oracleAddress);
+        newBatch();
+        _oracle = Oracle(oracleAddress);
         // _lastProcessTime = block.timestamp;
         // _cooldown = cooldown;
         // _fee = fee;
@@ -58,7 +59,7 @@ contract WorkerBatch is Ownable {
         // request random number
         // what if the oracle is down?
         // what if the oracle is hacked?
-        batches[currentBatch].requestId = oracle.getRandomNumber();
+        batches[currentBatch].requestId = _oracle.getRandomNumber();
         // now we wait until the chainlink's node fulfill our request
     }
 
@@ -67,6 +68,7 @@ contract WorkerBatch is Ownable {
         virtual
         onlyOracle
     {
+        console.log('worker job fulfilled');
         // what if the current batch is not right? maybe mapping requestId to batchId solves a pontential issue.
         require(
             batches[currentBatch].requestId == requestId,
@@ -86,6 +88,9 @@ contract WorkerBatch is Ownable {
     }
 
     // getters
+    function oracle() external view returns(address) {
+        return address(_oracle);
+    }
 
     function getBatch(uint256 id) public view returns (BatchData memory) {
         require(id <= currentBatch, "invalid batch id");
@@ -110,7 +115,7 @@ contract WorkerBatch is Ownable {
     // }
 
     modifier onlyOracle() {
-        require(msg.sender == address(oracle), "only oracle");
+        require(msg.sender == address(_oracle), "only oracle");
         _;
     }
 
