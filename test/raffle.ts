@@ -7,7 +7,7 @@ import { revertAfter } from "./utils/revert-after";
 
 const chai = require('chai');
 chai.use(require('chai-bn')(BN));
-const { expect } = chai
+const { expect } = chai;
 
 import { artifacts, ethers, network } from "hardhat";
 import { revert, takeSnapshot } from "./utils/utils";
@@ -103,7 +103,7 @@ describe("Raffle", function () {
     const tx = await contract.connect(signer).processBatch()
     const receipt = await tx.wait()
     const requestId = getEventArgFromLogs(
-      Coordinator,
+      coordinator,
       receipt.logs,
       // receipt.logs.filter(l => l.address === contract.address),
       "RandomnessRequest",
@@ -229,25 +229,25 @@ describe("Raffle", function () {
     await raffle.connect(winner).claim(1, winnerData.index)
   }).timeout(1000*60*15)
 
-  it.only('self destruct', async function() {
-    const accounts = await createWallets(500)
-    const raffle = await newRaffle()
-    const times = 100
+  // it.only('self destruct', async function() {
+  //   const accounts = await createWallets(500)
+  //   const raffle = await newRaffle()
+  //   const times = 100
     
-    for (let i; i < times; i++) {
-      // new raffle => batch 1
+  //   for (let i; i < times; i++) {
+  //     // new raffle => batch 1
       
-      // all the accounts buy one ticket
-      await Promise.all(accounts.map(acc => raffle.connect(acc).buy(1)))
-      // process batch
-      await processAndFulfill(raffle, deployer)
-    }
-    const b = await deployer.getBalance()
-    await raffle.connect(deployer).finalize()
-    await raffle.connect(deployer).end()
-    const ba = await deployer.getBalance()
-    console.log(formatEther(b.sub(ba)))
-  }).timeout(1000*60*25)
+  //     // all the accounts buy one ticket
+  //     await Promise.all(accounts.map(acc => raffle.connect(acc).buy(1)))
+  //     // process batch
+  //     await processAndFulfill(raffle, deployer)
+  //   }
+  //   const b = await deployer.getBalance()
+  //   await raffle.connect(deployer).finalize()
+  //   await raffle.connect(deployer).end()
+  //   const ba = await deployer.getBalance()
+  //   console.log(formatEther(b.sub(ba)))
+  // }).timeout(1000*60*25)
 
 
 
