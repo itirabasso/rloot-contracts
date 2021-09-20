@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 pragma solidity ^0.8.0;
 // pragma experimental ABIEncoderV2;
 
@@ -17,11 +19,17 @@ contract OracleMock is VRFConsumerBase, Ownable {
     constructor(uint256 fee)
         Ownable()
         VRFConsumerBase(
-            0xec70aBEb2AE288b2B654AF4C55D5669EF26FFa1e, // VRF Coordinator
-            0x01BE23585060835E02B77ef475b0Cc51aA1e0709 // LINK Token
+            // 0xec70aBEb2AE288b2B654AF4C55D5669EF26FFa1e, // VRF Coordinator Rinkeby
+            // 0x01BE23585060835E02B77ef475b0Cc51aA1e0709 // LINK Token Rinkeby
+            // 0x8C7382F9D8f56b33781fE506E897a4F1e2d17255, //VRF Coordinator mumbai
+            0x4c02A364ed06d37030F6819bEfA36490B095D957, // local tests
+            0x326C977E6efc84E512bB9C30f76E30c160eD06FB // LINK Token mumbai
         )
     {
-        keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
+        // RINKEBY
+        // keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
+        // mumbai
+        keyHash = 0x6e75b569a01ef56d18cab6a8e71e6600d6ce853834d4a5748b720d06f878b3a4;
         _fee = fee; // 0.1 * 10 ** 18; // 0.1 LINK        
     }
 

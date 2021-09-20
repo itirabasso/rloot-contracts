@@ -51,11 +51,7 @@ contract VRFCoordinatorMock {
     bytes memory resp = abi.encodeWithSelector(v.rawFulfillRandomness.selector, requestId, randomness);
     uint256 b = 206000;
     require(gasleft() >= b, "not enough gas for consumer");
-    // console.log('calling fullfilJob from %s with %d', consumerContract, randomness);
-    // console.logBytes32(requestId);
-    
     (bool success,) = consumerContract.call(resp);
-    // Worker(consumerContract).fulfillRandomness(requestId, randomness);
   }
 
   function reset() public {
