@@ -8,6 +8,7 @@ import "solidity-coverage"
 // require('./scripts/game')
 // require('./scripts/rloot')
 // require('./scripts/management')
+require('./scripts/raffle')
 
 import "@nomiclabs/hardhat-etherscan";
 import "hardhat-gas-reporter"
@@ -43,39 +44,12 @@ export default {
         
       }
     },
-    kovan: {
-      url: 'https://eth-kovan.alchemyapi.io/v2/TqGuuMN8VQTIhz1RcRjTCneWWIbonrjx',
-      chainId: 42,
-      accounts: {
-        mnemonic
-      }
-    },
     mumbai: {
-      url: 'https://rpc-mumbai.matic.today',
+      url: 'https://polygon-mumbai.g.alchemy.com/v2/du8xyOP3WSstXJf8JNaK8dSYjlFDFoR9',
       chainId: 80001,
       accounts: {
         mnemonic
       }
-    },
-    rinkeby: {
-      url: 'https://eth-rinkeby.alchemyapi.io/v2/63SAsoDt322jm-yUuQ7N-3aAAannBCmI',
-      accounts: {
-        mnemonic
-      },
-    },
-    goerli: {
-      // url: 'https://goerli.infura.io/v3/' + process.env.INFURA_ID,
-      url: 'https://eth-goerli.alchemyapi.io/v2/du8xyOP3WSstXJf8JNaK8dSYjlFDFoR9',
-      accounts: {
-        mnemonic,
-      },
-    },
-    xdai: {
-      url: `https://rpc.xdaichain.com/`,
-      chainId: 100,
-      accounts: {
-        mnemonic
-      },
     },
     localhost: {
       url: 'http://localhost:8545',
