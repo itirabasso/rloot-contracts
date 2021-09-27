@@ -6,10 +6,16 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import {RLoot} from "./RLoot.sol";
+import {LootProperties} from "./LootProperties.sol";
 import "./WorkerBatch.sol";
+
 import "hardhat/console.sol";
 
 contract Raffle is Ownable, WorkerBatch {
+
+    using LootProperties for Raffle;
+
+
     struct WinnerData {
         uint256 index;
         address winner;
@@ -81,9 +87,10 @@ contract Raffle is Ownable, WorkerBatch {
         //
         // require(participated[msg.sender] == batchId, "you havent participated");
         // this index in this batch is the sender
-        require(requests[batchId][index] == msg.sender, "wrong index");
+        require(requests[batchId][index] == msg.sender, "wrong ticket");
         // the batch hasnt been 
-        require(batches[batchId].seed != 0, "batch not processed yet");
+        uint256 seed = batches[batchId].seed;
+        require(seed != 0, "batch not processed yet");
         // it's processed => fetch batch winner
         WinnerData storage winner = winners[batchId];
         // winner index is correct
@@ -95,7 +102,10 @@ contract Raffle is Ownable, WorkerBatch {
 
         // we can skip this and just selfdestruct at some point in the future.
         // delete requests[batchId];
-        // console.log("%d - %d", gasleft(), requests[batchId].length);
+
+        // todo : make it rare
+        // lootNFT.mintLoot(LootProperties.makeSeed(seed, msg.sender), msg.sender);
+        lootNFT.mintLoot(batchId+1, msg.sender);
 
         emit WinnerClaim(msg.sender, batchId);
     }
