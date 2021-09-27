@@ -67,7 +67,7 @@ contract RLoot is
     event UpdateLoot(uint256 indexed lootId, uint256 properties);
 
     constructor() ERC721("rLOOT", "rLOOT") Ownable() {
-        _mint(address(this), 0);
+        _mintLoot(0, msg.sender, 0);
         _uri = "";
     }
 
@@ -81,6 +81,17 @@ contract RLoot is
         returns (uint256)
     {
         uint256 lootId = loots.length;
+        // loots.push(properties);
+        // holders[lootId] = LootHolder({holder: to, nonce: 0});
+        // destroyed[lootId] = false;
+        // super._mint(to, lootId);
+        return _mintLoot(properties, to, lootId);
+    }
+
+    function _mintLoot(uint256 properties, address to, uint256 lootId)
+        internal
+        returns (uint256)
+    {
         loots.push(properties);
         holders[lootId] = LootHolder({holder: to, nonce: 0});
         destroyed[lootId] = false;
@@ -89,6 +100,7 @@ contract RLoot is
 
         return lootId;
     }
+
 
     /// @notice updates a loot
     /// @param lootId tokenId of the loot to update
@@ -247,7 +259,9 @@ contract RLoot is
         address to,
         uint256 tokenId
     ) internal virtual override(ERC721Enumerable) {
-        require(isHolding(from, tokenId));
+        if (from != address(0)) {
+            require(isHolding(from, tokenId));
+        }
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
