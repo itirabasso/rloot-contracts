@@ -22,7 +22,7 @@ contract OracleMock is VRFConsumerBase, Ownable {
             // 0xec70aBEb2AE288b2B654AF4C55D5669EF26FFa1e, // VRF Coordinator Rinkeby
             // 0x01BE23585060835E02B77ef475b0Cc51aA1e0709 // LINK Token Rinkeby
             // 0x8C7382F9D8f56b33781fE506E897a4F1e2d17255, //VRF Coordinator mumbai
-            0x4c02A364ed06d37030F6819bEfA36490B095D957, // local tests
+            0x67de08Da473cE0F6795eBFCEA271A0724f97c0BF, // local tests
             0x326C977E6efc84E512bB9C30f76E30c160eD06FB // LINK Token mumbai
         )
     {

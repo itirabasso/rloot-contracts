@@ -37,10 +37,13 @@ contract Raffle is Ownable, WorkerBatch {
 
     uint256 public MAX_REQUESTS_PER_BATCH = 5;
 
-        // uint256 cooldown,
         // uint256 fee
-    constructor(address lootAddress, address oracleAddress)
-        WorkerBatch(oracleAddress)
+    constructor(
+        address lootAddress,
+        address oracleAddress,
+        uint256 cooldown
+    )
+        WorkerBatch(oracleAddress, cooldown)
         Ownable()
     {
         lootNFT = RLoot(lootAddress);
@@ -79,19 +82,19 @@ contract Raffle is Ownable, WorkerBatch {
         onlyOracle
     {
         // seed % amount of participants == index
-        winners[currentBatch].index = randomness % requests[currentBatch].length;
+        winners[currentBatch - 1].index = randomness % requests[currentBatch - 1].length;
         super.fullfilJob(requestId, randomness);
     }
 
     function claim(uint256 batchId, uint256 index) external {
-        //
+        // console.log("Claiming %d - %d", batchId, index);
         // require(participated[msg.sender] == batchId, "you havent participated");
         // this index in this batch is the sender
         require(requests[batchId][index] == msg.sender, "wrong ticket");
         // the batch hasnt been 
         uint256 seed = batches[batchId].seed;
         require(seed != 0, "batch not processed yet");
-        // it's processed => fetch batch winner
+        // it's processed => fetch batch winne
         WinnerData storage winner = winners[batchId];
         // winner index is correct
         require(winner.index == index, "you are not the winner");

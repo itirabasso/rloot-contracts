@@ -7,8 +7,9 @@ import "solidity-coverage"
 // require('./scripts/chainlink')
 // require('./scripts/game')
 // require('./scripts/rloot')
-// require('./scripts/management')
-require('./scripts/raffle')
+require('./scripts/management')
+// require('./scripts/raffle')
+import './scripts/raffle'
 
 import "@nomiclabs/hardhat-etherscan";
 import "hardhat-gas-reporter"

@@ -11,6 +11,9 @@ import { formatEther, randomBytes, splitSignature } from "ethers/lib/utils";
 // const publishDir = "../react-app/src/contracts";
 // const graphDir = "../subgraph"
 
+// Mumbai - LINK Token
+const LINK_ADDRESS = '0x326C977E6efc84E512bB9C30f76E30c160eD06FB'
+
 const contracts = {}
 task('raffle-deploy')
   .setAction(async ({ publish }, { ethers, config, network, run }: HardhatRuntimeEnvironment) => {
@@ -19,14 +22,33 @@ task('raffle-deploy')
     await run('compile')
 
     console.log("Deploying with", await deployer.getAddress(), "\n");
+
+    /**
+     */
+     const coordinator = await deploy('VRFCoordinatorMock', [LINK_ADDRESS])
+     await coordinator.deployed()
+     console.log('Coordinator address', coordinator.address)
+
     const oracleFee = parseEther('0.0001')
     const oracle = await deploy(
       network.name === 'localhost' ? 'OracleMock' : 'Oracle',
       [oracleFee]
     )
     console.log(oracle.address)
-    const raffle = await deploy('Raffle', [oracle.address])
+    const loot = await deploy('RLoot')
+    const cooldown = 600
+    const raffle = await deploy('Raffle', [loot.address, oracle.address, cooldown])
     // const combiner = await deploy('Combiner', [stone.address, oracle.address])
+ /**
+  yarn hardhat add-worker
+    --loot-address 0x6dDEca038e601F7D835b221ef84D06E35f52Dc7b
+    --worker 0x582C8DC0799888203303bcBF3AfD328D4E8779a8
+
+ */
+    await run('add-worker', {
+      lootAddress: loot.address,
+      worker: raffle.address,
+    })
 
     await run('fund-link', { oracle: oracle.address })
 
@@ -78,7 +100,7 @@ task('raffle-deploy')
 
 task('get-abis')
 .setAction(async ({ publish }, { ethers, config, artifacts, run }: HardhatRuntimeEnvironment) => {
-  const contracts = ['Oracle', 'Stone', 'Miner', 'Breaker']
+  const contracts = ['Oracle', 'RLoot', 'Raffle']
   let content = ''
   for (let name of contracts) {
     const { abi } = await artifacts.readArtifact(name)
