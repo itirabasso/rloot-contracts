@@ -83,7 +83,9 @@ describe("Raffle", function () {
     Coordinator = new VRFCoordinatorMock__factory(deployer)
     Fulfiller = new Fulfiller__factory(deployer)
   })
+
   revertAfter()
+
   sharedBeforeEach(async function () {
     const oracleFee = parseEther('0.0001')
 
@@ -134,9 +136,11 @@ describe("Raffle", function () {
     const bytesHex = bytes.reduce((o, v) => o + ('00' + v.toString(16)).slice(-2), '');
     return BigNumber.from(BigInt('0x' + bytesHex).toString(10));
   }
+
   async function processAndFulfillWithNumber(contract: Contract, signer: Signer, randomness: BigNumberish) {
     return processAndFulfill(contract, signer, randomness)
   }
+
   async function processAndFulfill(contract: Contract, signer?: Signer, randomness?: BigNumberish) {
     const prevBatch = await contract.currentBatch()
     const batch = await contract.batches(prevBatch)
@@ -192,6 +196,7 @@ describe("Raffle", function () {
 
   it("init raffle", async function () {
   })
+
   describe("raffle is not authorized", async function () {
 
 
@@ -301,7 +306,7 @@ describe("Raffle", function () {
       }
     })
 
-    it.only("should succeed", async function () {
+    it("should succeed", async function () {
       // buy 1 ticket
       await raffle.buy(1)
       // await raffle.buy(1)
@@ -325,7 +330,6 @@ describe("Raffle", function () {
       // console.log(await raffle.isWinner(deployer.address, 1))
     })
 
-
     describe.skip("stress test", async function () {
       let accounts: Wallet[]
       before(async function () {
@@ -346,8 +350,8 @@ describe("Raffle", function () {
         // find user index in batch
         // const index = await raffle.findIndex(1, deployer.address)
         // claim
-        let winner = accounts[winnerData.index.toNumber()]
-        await raffle.connect(winner).claim(1, winnerData.index)
+        // let winner = accounts[winnerData.index.toNumber()]
+        // await raffle.connect(winner).claim(1, winnerData.index)
       }).timeout(1000 * 60 * 15)
 
       it('self destruct', async function () {
