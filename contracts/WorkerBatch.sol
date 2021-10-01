@@ -79,8 +79,8 @@ abstract contract WorkerBatch is Ownable {
         );
         // set the random number for the current batch
         // batch.seed = randomness;
-        batches[currentBatch-1].seed = randomness;
-        console.log(batches[currentBatch-1].seed);
+        batch.seed = randomness;
+        console.log(batch.seed);
         // batch is no longer processing
         batch.processing = false;
         // emit batch processed event
