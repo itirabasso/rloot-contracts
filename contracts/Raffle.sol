@@ -17,8 +17,9 @@ contract Raffle is Ownable, WorkerBatch {
 
 
     struct WinnerData {
-        uint256 index;
         address winner;
+        uint256 index;
+        bool claimed;
     }
 
     // batch id => participants addresses
@@ -64,17 +65,7 @@ contract Raffle is Ownable, WorkerBatch {
         emit TicketSold(msg.sender, currentBatch, 1);
     }
 
-    // function isWinner(address account, uint256 batchId)
-    //     external
-    //     view
-    //     returns (bool)
-    // {
-    //     // no winner for this batch yet.
-    //     if (winners[batchId].winner == address(0)) {
-    //         return false;
-    //     }
-    //     return winners[batchId].winner == account;
-    // }
+    // di
 
     function fullfilJob(bytes32 requestId, uint256 randomness)
         public
@@ -82,7 +73,10 @@ contract Raffle is Ownable, WorkerBatch {
         onlyOracle
     {
         // seed % amount of participants == index
-        winners[currentBatch - 1].index = randomness % requests[currentBatch - 1].length;
+        WinnerData storage winner = winners[currentBatch - 1];
+        uint256 winnerIndex = randomness % requests[currentBatch - 1].length;
+        winner.index = winnerIndex;
+        winner.winner = requests[currentBatch - 1][winnerIndex];
         super.fullfilJob(requestId, randomness);
     }
 
@@ -97,11 +91,11 @@ contract Raffle is Ownable, WorkerBatch {
         // it's processed => fetch batch winne
         WinnerData storage winner = winners[batchId];
         // winner index is correct
-        require(winner.index == index, "you are not the winner");
+        // require(winner.index == index, "you are not the winner");
         // winner is not set => hasnt been claimed
-        require(winner.winner == address(0), "already claimed");
-        // set the winner
-        winner.winner = msg.sender;
+        require(!winner.claimed, "already claimed");
+        // prize claimed
+        winner.claimed = true;
 
         // we can skip this and just selfdestruct at some point in the future.
         // delete requests[batchId];
@@ -118,7 +112,7 @@ contract Raffle is Ownable, WorkerBatch {
         for (uint256 i = 0; i < participants.length; i++) {
             if (participants[i] == account) {
                 return i;
-            }
+             }
         }
         revert("not found");
     }
