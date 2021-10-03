@@ -4,8 +4,7 @@ pragma solidity ^0.8.0;
 // import "hardhat/console.sol";
 
 library LootProperties {
-
-/*
+    /*
     ```This is a Gemstone.
     It is perfectly round.
     It weighs 1.602 Kg(s).
@@ -28,7 +27,11 @@ library LootProperties {
     uint256 internal constant WEIGHT = 2 * 0x8;
     uint256 internal constant RARITY = 4 * 0x8;
 
-    function getBits8(uint256 value, uint256 from) internal pure returns(uint8) {
+    function getBits8(uint256 value, uint256 from)
+        internal
+        pure
+        returns (uint8)
+    {
         return uint8((value & (0xff << from)) >> from);
     }
 
@@ -43,15 +46,12 @@ library LootProperties {
     function getWeight(uint256 value) public pure returns (uint8) {
         return getBits8(value, WEIGHT);
     }
+
     function getRarity(uint256 value) public pure returns (uint8) {
         return getBits8(value, RARITY);
     }
 
-    function getValue(LootData memory props)
-        public
-        pure
-        returns (uint256)
-    {
+    function getValue(LootData memory props) public pure returns (uint256) {
         return
             combineProperties(
                 props.material,
@@ -69,10 +69,10 @@ library LootProperties {
     ) public pure returns (uint256) {
         return
             uint256(
-                uint256(rarity) << RARITY |
-                uint256(weight) << WEIGHT |
-                uint256(color) << COLOR |
-                uint256(material)
+                (uint256(rarity) << RARITY) |
+                    (uint256(weight) << WEIGHT) |
+                    (uint256(color) << COLOR) |
+                    uint256(material)
             );
     }
 
@@ -81,13 +81,13 @@ library LootProperties {
         pure
         returns (LootData memory)
     {
-        return
-            LootData({
-                material: getMaterial(value),
-                color: getColor(value),
-                weight: getWeight(value),
-                rarity: getRarity(value)
-            });
+        return LootData({
+            material: getMaterial(value),
+            color: getColor(value),
+            weight: getWeight(value),
+            rarity: getRarity(value)
+        });
+
     }
 
     function createProperties(uint256 seed) public pure returns (uint256) {
@@ -96,21 +96,49 @@ library LootProperties {
         return qualities;
     }
 
+    function writeBits8(
+        uint256 properties,
+        uint8 value,
+        uint256 to
+    ) public pure returns (uint256) {
+        return uint256(properties | uint256(value & (0xff << to)));
+    }
+
+    function applyTo(LootData memory props, uint256 value)
+        public pure
+        returns (uint256)
+    {
+        uint256 v = writeBits8(value, props.material, MATERIAL);
+        v = writeBits8(v, props.color, COLOR);
+        v = writeBits8(v, props.weight, WEIGHT);
+        v = writeBits8(v, props.rarity, RARITY);
+        return v;
+    }
+
     function shuffleProperties(uint256 value, uint256 random)
         public
         pure
         returns (uint256)
     {
-        LootData memory props = getProperties(value);
+        // LootData memory props = getProperties(value);
         // Transform stone into another one
 
-        props.color = props.color ^ getBits8(random, COLOR);
-        props.material = props.material ^ getBits8(random, MATERIAL);
-        
+        // props.color = props.color ^ getBits8(random, COLOR);
+        uint8 color = getColor(value) ^ getBits8(random, COLOR);
+        uint8 material = getMaterial(value) ^ getBits8(random, MATERIAL);
+        // props.material = props.material ^ getBits8(random, MATERIAL);
+        uint8 weight = getWeight(value) ^ getBits8(random, WEIGHT);
         // rarity should go up on shuffling
-        props.rarity = props.rarity ^ getBits8(random, RARITY);
+        // props.rarity = props.rarity ^ getBits8(random, RARITY);
+        uint8 rarity = getRarity(value) ^ getBits8(random, RARITY);
 
-        return getValue(props);
+        //
+        uint256 v = writeBits8(value, material, MATERIAL);
+        v = writeBits8(v, color, COLOR);
+        v = writeBits8(v, weight, WEIGHT);
+        v = writeBits8(v, rarity, RARITY);
+
+        return v;
     }
 
     /**
@@ -119,7 +147,11 @@ library LootProperties {
         @param owner address of the loot's owner
         @return the token's id.
     */
-    function makeSeed(uint256 seed, address owner) public pure returns(uint256) {
+    function makeSeed(uint256 seed, address owner)
+        public
+        pure
+        returns (uint256)
+    {
         return uint256(keccak256(abi.encode(seed, owner)));
     }
 }
