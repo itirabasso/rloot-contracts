@@ -18,7 +18,7 @@ contract Raffle is Ownable, WorkerBatch {
 
     struct WinnerData {
         address winner;
-        uint256 index;
+        uint88 index;
         bool claimed;
     }
 
@@ -74,7 +74,7 @@ contract Raffle is Ownable, WorkerBatch {
     {
         // seed % amount of participants == index
         WinnerData storage winner = winners[currentBatch - 1];
-        uint256 winnerIndex = randomness % requests[currentBatch - 1].length;
+        uint88 winnerIndex = uint88(randomness % requests[currentBatch - 1].length);
         winner.index = winnerIndex;
         winner.winner = requests[currentBatch - 1][winnerIndex];
         super.fullfilJob(requestId, randomness);
@@ -101,8 +101,11 @@ contract Raffle is Ownable, WorkerBatch {
         // delete requests[batchId];
 
         // todo : make it rare
-        // lootNFT.mintLoot(LootProperties.makeSeed(seed, msg.sender), msg.sender);
-        lootNFT.mintLoot(batchId+1, msg.sender);
+        lootNFT.mintLoot(
+            uint256(keccak256(abi.encode(seed, batchId, msg.sender))),
+            msg.sender
+        );
+        // lootNFT.mintLoot(batchId+1, msg.sender);
 
         emit WinnerClaim(msg.sender, batchId);
     }
