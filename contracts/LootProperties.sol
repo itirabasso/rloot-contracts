@@ -1,25 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.0;
 
-// import "hardhat/console.sol";
-
 library LootProperties {
-    /*
-    ```This is a Gemstone.
-    It is perfectly round.
-    It weighs 1.602 Kg(s).
-    It's surface is smooth.
-    It is white in color.
-    There are pearly stripes across it's surface.
-    The air humms around it.
-    It is warm to the touch.```
-*/
 
     struct LootData {
         uint8 material;
         uint8 color;
         uint8 weight;
-        uint8 rarity; // change to `condition`
+        uint8 rarity;
     }
 
     uint256 internal constant MATERIAL = 0 * 0x8;
@@ -61,6 +49,8 @@ library LootProperties {
             );
     }
 
+    /// @notice combine the given properties into a single value.
+    /// @dev this may not work for complex/large entities
     function combineProperties(
         uint8 material,
         uint8 color,
@@ -76,6 +66,9 @@ library LootProperties {
             );
     }
 
+    /// @notice 
+    /// @param value the properties
+    /// @return A LootData representing the given `value`
     function getProperties(uint256 value)
         public
         pure
@@ -90,24 +83,31 @@ library LootProperties {
 
     }
 
+    /// @notice creates properties from a given seed number.
+    /// @param seed a randomly generated number
     function createProperties(uint256 seed) public pure returns (uint256) {
         uint256 qualities = seed;
         // needs more shuffling (?)
         return qualities;
     }
 
+    /// @notice Overwrite `value` at `position` in `properties`.
+    /// @param properties the properties
+    /// @param value value to write 
+    /// @param position position where the value is written
     function writeBits8(
         uint256 properties,
         uint8 value,
-        uint256 to
+        uint256 position
     ) public pure returns (uint256) {
-        return uint256(properties | uint256(value & (0xff << to)));
+        return uint256(properties | uint256(value & (0xff << position)));
     }
 
     function applyTo(LootData memory props, uint256 value)
         public pure
         returns (uint256)
     {
+
         uint256 v = writeBits8(value, props.material, MATERIAL);
         v = writeBits8(v, props.color, COLOR);
         v = writeBits8(v, props.weight, WEIGHT);
@@ -115,25 +115,19 @@ library LootProperties {
         return v;
     }
 
-    function shuffleProperties(uint256 value, uint256 random)
+    function shuffleProperties(uint256 properties, uint256 random)
         public
         pure
         returns (uint256)
     {
-        // LootData memory props = getProperties(value);
-        // Transform stone into another one
+        // xor each property with 8 random bits
+        uint8 color = getColor(properties) ^ getBits8(random, COLOR);
+        uint8 material = getMaterial(properties) ^ getBits8(random, MATERIAL);
+        uint8 weight = getWeight(properties) ^ getBits8(random, WEIGHT);
+        uint8 rarity = getRarity(properties) ^ getBits8(random, RARITY);
 
-        // props.color = props.color ^ getBits8(random, COLOR);
-        uint8 color = getColor(value) ^ getBits8(random, COLOR);
-        uint8 material = getMaterial(value) ^ getBits8(random, MATERIAL);
-        // props.material = props.material ^ getBits8(random, MATERIAL);
-        uint8 weight = getWeight(value) ^ getBits8(random, WEIGHT);
-        // rarity should go up on shuffling
-        // props.rarity = props.rarity ^ getBits8(random, RARITY);
-        uint8 rarity = getRarity(value) ^ getBits8(random, RARITY);
-
-        //
-        uint256 v = writeBits8(value, material, MATERIAL);
+        // overwrite each property within `value` with their new value.
+        uint256 v = writeBits8(properties, material, MATERIAL);
         v = writeBits8(v, color, COLOR);
         v = writeBits8(v, weight, WEIGHT);
         v = writeBits8(v, rarity, RARITY);
