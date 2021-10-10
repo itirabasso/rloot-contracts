@@ -24,19 +24,26 @@ task('raffle-deploy')
 
     console.log("Deploying with", await deployer.getAddress(), "\n");
 
-    // const properties = await deploy('LootProperties')
-    // await properties.deployed()
-    // console.log('LootProperties address', properties.address)
-
-    const oracleFee = parseEther('0.1')
+    const properties = await deploy('LootProperties')
+    await properties.deployed()
+    console.log('LootProperties address', properties.address)
+    const oracleFee = parseEther(
+      network.name === 'mumbai' ? '0.0001' : '0.1'
+    )
     const oracle = await deploy(
       network.name === 'localhost' ? 'OracleMock' : 'Oracle',
       [oracleFee]
     )
     console.log(oracle.address)
     const loot = await deploy('RLoot')
-    const cooldown = 600
+    const cooldown = 60
     const raffle = await deploy('Raffle', [loot.address, oracle.address, cooldown])
+    console.log(JSON.stringify({
+      'LootProperties': properties.address,
+      'Oracle': oracle.address,
+      'RLoot': loot.address,
+      'Raffle': raffle.address
+    }))
     // const combiner = await deploy('Combiner', [stone.address, oracle.address])
     /**
      yarn hardhat add-worker

@@ -4,17 +4,31 @@ import { deploy } from "./utils";
 import fs from "fs";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
+task('add-worker')
+  .addParam('worker')
+  .addParam('lootAddress')
+  .setAction(async ({ worker, lootAddress }, { ethers, config, artifacts, run }) => {
+    const signers = await ethers.getSigners()
+    const deployer = signers[0]
+    console.log('Adding worker:', worker)
+    const loot = await ethers.getContractAt('contracts/RLoot.sol:RLoot', lootAddress);
+    const tx = await loot.connect(deployer).addWorker(worker)
+    await tx.wait()
+  })
+
 
 // const LINK_ADDRESS = '0x326C977E6efc84E512bB9C30f76E30c160eD06FB'
 const LINK_ADDRESS = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709'
 task('fund-link')
   .addParam('oracle')
-  .setAction(async ({ oracle }, { ethers, config, run }) => {
+  .addOptionalParam('amount', 'funding amount', '1')
+  .setAction(async ({ oracle, amount }, { ethers, config, run }) => {
     const signers = await ethers.getSigners()
     const deployer = signers[0]
-    // console.log('Sending 0.001 LINK from', await deployer.getAddress(), 'to', oracle)
+    console.log('Signing address:', deployer.address)
+    console.log('Funding oracle:', oracle)
     const link = await ethers.getContractAt('IERC20', LINK_ADDRESS);
-    let tx = await link.connect(deployer).transfer(oracle, parseEther("1"))
+    let tx = await link.connect(deployer).transfer(oracle, parseEther(amount))
     console.log('tx at', tx.hash)
     await tx.wait()
   })
@@ -84,18 +98,6 @@ task('deploy-libraries')
       lootMath
     }
 })
-
-task('add-worker')
-  .addParam('worker')
-  .addParam('lootAddress')
-  .setAction(async ({ worker, lootAddress }, { ethers, config, artifacts, run }) => {
-    const signers = await ethers.getSigners()
-    const deployer = signers[0]
-    console.log('Adding worker:', worker)
-    const loot = await ethers.getContractAt('contracts/RLoot.sol:RLoot', lootAddress);
-    const tx = await loot.connect(deployer).addWorker(worker)
-    await tx.wait()
-  })
 
 task('deploy-worker')
   .addParam('workerName')
