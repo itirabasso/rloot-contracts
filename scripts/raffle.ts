@@ -12,8 +12,9 @@ import { formatEther, randomBytes, splitSignature } from "ethers/lib/utils";
 // const graphDir = "../subgraph"
 
 // Mumbai - LINK Token
-const LINK_ADDRESS = '0x326C977E6efc84E512bB9C30f76E30c160eD06FB'
-
+// const LINK_ADDRESS = '0x326C977E6efc84E512bB9C30f76E30c160eD06FB'
+// rinkeby - LINK token
+const LINK_ADDRESS = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709'
 const contracts = {}
 task('raffle-deploy')
   .setAction(async ({ publish }, { ethers, config, network, run }: HardhatRuntimeEnvironment) => {
@@ -23,13 +24,11 @@ task('raffle-deploy')
 
     console.log("Deploying with", await deployer.getAddress(), "\n");
 
-    /**
-     */
-     const coordinator = await deploy('VRFCoordinatorMock', [LINK_ADDRESS])
-     await coordinator.deployed()
-     console.log('Coordinator address', coordinator.address)
+    // const properties = await deploy('LootProperties')
+    // await properties.deployed()
+    // console.log('LootProperties address', properties.address)
 
-    const oracleFee = parseEther('0.0001')
+    const oracleFee = parseEther('0.1')
     const oracle = await deploy(
       network.name === 'localhost' ? 'OracleMock' : 'Oracle',
       [oracleFee]
@@ -39,12 +38,12 @@ task('raffle-deploy')
     const cooldown = 600
     const raffle = await deploy('Raffle', [loot.address, oracle.address, cooldown])
     // const combiner = await deploy('Combiner', [stone.address, oracle.address])
- /**
-  yarn hardhat add-worker
-    --loot-address 0x6dDEca038e601F7D835b221ef84D06E35f52Dc7b
-    --worker 0x582C8DC0799888203303bcBF3AfD328D4E8779a8
-
- */
+    /**
+     yarn hardhat add-worker
+       --loot-address 0x6dDEca038e601F7D835b221ef84D06E35f52Dc7b
+       --worker 0x582C8DC0799888203303bcBF3AfD328D4E8779a8
+   
+    */
     await run('add-worker', {
       lootAddress: loot.address,
       worker: raffle.address,
@@ -55,7 +54,7 @@ task('raffle-deploy')
 
     let addresses = {}
     const content = fs.readFileSync(`${config.paths.cache}/addresses.json`)
-    if (content === undefined || content.length == 0) {    
+    if (content === undefined || content.length == 0) {
       addresses[network.name] = contracts
     } else {
       addresses = JSON.parse(content.toString())
@@ -99,19 +98,19 @@ task('raffle-deploy')
 
 
 task('get-abis')
-.setAction(async ({ publish }, { ethers, config, artifacts, run }: HardhatRuntimeEnvironment) => {
-  const contracts = ['Oracle', 'RLoot', 'Raffle']
-  let content = ''
-  for (let name of contracts) {
-    const { abi } = await artifacts.readArtifact(name)
-    if (abi === undefined) continue
-    content += 'const ' + name.toUpperCase() + '_ABI = ' + JSON.stringify(abi) + ';\n'
-  }
-  fs.writeFileSync(
-    config.paths.cache + '/abis.js',
-    content
-  )
-})
+  .setAction(async ({ publish }, { ethers, config, artifacts, run }: HardhatRuntimeEnvironment) => {
+    const contracts = ['Oracle', 'RLoot', 'Raffle', 'LootProperties']
+    let content = ''
+    for (let name of contracts) {
+      const { abi } = await artifacts.readArtifact(name)
+      if (abi === undefined) continue
+      content += 'const ' + name.toUpperCase() + '_ABI = ' + JSON.stringify(abi) + ';\n'
+    }
+    fs.writeFileSync(
+      config.paths.cache + '/abis.js',
+      content
+    )
+  })
 
 task('deploy-piedras-aludel', 'Deploy Crucible factory contracts')
   .addPositionalParam('vaultFactoryAddress')
@@ -134,7 +133,7 @@ task('deploy-piedras-aludel', 'Deploy Crucible factory contracts')
       console.log('  to', contract.address)
       console.log('  in', contract.deployTransaction.hash)
       return contract.deployed()
-   }
+    }
 
     const signers = await ethers.getSigners()
     const admin = signers[0]
@@ -318,7 +317,7 @@ task('mint-and-lock', 'Mint Crucible and lock in Aludel')
     )
 
     const tokenId = args.tokenId
-    
+
     console.log('Sign Permit')
 
     const permit = await signPermitEIP2612ERC721(
