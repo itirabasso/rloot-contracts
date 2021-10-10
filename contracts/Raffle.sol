@@ -64,8 +64,6 @@ contract Raffle is Ownable, WorkerBatch {
     /// @notice claims batch's prize
     /// @param batchId numer of batch
     function claim(uint256 batchId) external {
-        // check if sender is owner of ticket `index` in given batchId
-        // require(requests[batchId][index] == msg.sender, "wrong ticket");
         uint256 seed = batches[batchId].seed;
         // the batch hasnt been processed
         require(seed != 0, "batch not processed yet");
@@ -78,9 +76,8 @@ contract Raffle is Ownable, WorkerBatch {
         // set as claimed
         winner.claimed = true;
 
-        // todo : make it rare
         lootNFT.mintLoot(
-            uint256(keccak256(abi.encode(seed, batchId, msg.sender))),
+            LootProperties.makeRareSeed(seed, batchId, msg.sender),
             msg.sender
         );
 
