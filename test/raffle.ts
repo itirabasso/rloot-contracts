@@ -44,7 +44,7 @@ describe("Raffle", function () {
   let deployer: SignerWithAddress
   let user: SignerWithAddress
   let anotherUser: SignerWithAddress
-  // contracts factories
+
   let Loot: RLoot__factory
   let Oracle: OracleMock__factory
   let Raffle: Raffle__factory
@@ -210,9 +210,9 @@ describe("Raffle", function () {
       await increaseTime(600)
       await processAndFulfill(raffle, deployer)
       // find user index in batch
-      const index = await raffle.findIndex(1, deployer.address)
+      // const index = await raffle.findIndex(1, deployer.address)
       // claim
-      await expect(raffle.claim(1, index)).to.be.reverted
+      await expect(raffle.claim(1)).to.be.reverted
 
       // batch 2
       // // buy a ticket
@@ -247,7 +247,7 @@ describe("Raffle", function () {
       // find user index in batch
       const index = await raffle.findIndex(1, deployer.address)
       // claim
-      await raffle.claim(1, index)
+      await raffle.claim(1)
       const properties = await loot.getProperties(1)
 
       // batch 2
@@ -273,9 +273,9 @@ describe("Raffle", function () {
       const index = await raffle.findIndex(1, user.address)
       // // claim
       await expect(
-        raffle.claim(1, 1)
-      ).to.be.revertedWith("wrong ticket")
-      await raffle.connect(user).claim(1, 0)
+        raffle.connect(anotherUser).claim(1)
+      ).to.be.revertedWith("you are not the winner")
+      await raffle.connect(user).claim(1)
       // await raffle.connect(anotherUser).claim(1, index)
     })
 
@@ -291,7 +291,7 @@ describe("Raffle", function () {
       // find user index in batch
       const index = await raffle.findIndex(1, deployer.address)
       // claim
-      await raffle.claim(1, index)
+      await raffle.claim(1)
     })
 
     it('multiple rounds', async function () {
@@ -304,7 +304,7 @@ describe("Raffle", function () {
         // find user index in batch
         const index = await raffle.findIndex(i, deployer.address)
         // claim
-        await raffle.claim(i, index)
+        await raffle.claim(i)
       }
     })
 
@@ -319,7 +319,7 @@ describe("Raffle", function () {
       // find user index in batch
       const index = await raffle.findIndex(1, deployer.address)
       // claim
-      await raffle.claim(1, index)
+      await raffle.claim(1)
 
       // batch 2
       // // buy a ticket
