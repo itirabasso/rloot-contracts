@@ -205,7 +205,7 @@ describe("Raffle", function () {
       // new raffle => batch 1
       const raffle = await newRaffle()
       // buy 1 ticket
-      await raffle.buy(1)
+      await raffle.buy()
       // process batch
       await increaseTime(600)
       await processAndFulfill(raffle, deployer)
@@ -238,7 +238,7 @@ describe("Raffle", function () {
 
     it("should succeed", async function () {
       // buy 1 ticket
-      await raffle.buy(1)
+      await raffle.buy()
       // await raffle.buy(1)
       // process batch
       // await expect(raffle.claim(1, 1)).to.be.revertedWith("batch not processed yet")
@@ -263,9 +263,9 @@ describe("Raffle", function () {
 
     it("wrong ticket", async function () {
       // buy 1 ticket
-      await raffle.connect(user).buy(1)
+      await raffle.connect(user).buy()
       // another user buys one ticket
-      await raffle.connect(anotherUser).buy(1)
+      await raffle.connect(anotherUser).buy()
       // process batch
       await increaseTime(600)
       await processAndFulfillWithNumber(raffle, deployer, 6);
@@ -281,12 +281,12 @@ describe("Raffle", function () {
 
     it("cooldown", async function () {
       // buy 1 ticket
-      await raffle.buy(1)
+      await raffle.buy()
       // process batch
-      await expect(processAndFulfill(raffle, deployer)).to.be.revertedWith("cooldown")
-      await increaseTime(598)
-      await expect(processAndFulfill(raffle, deployer)).to.be.revertedWith("cooldown")
-      await increaseTime(1)
+      await expect(
+        processAndFulfill(raffle, deployer)
+      ).to.be.revertedWith("cooldown")
+      await increaseTime(599)
       await processAndFulfill(raffle, deployer)
       // find user index in batch
       const index = await raffle.findIndex(1, deployer.address)
@@ -297,7 +297,7 @@ describe("Raffle", function () {
     it('multiple rounds', async function () {
       for (let i = 1; i < 5; i++) {
         // buy 1 ticket
-        await raffle.buy(1)
+        await raffle.buy()
         // process batch
         await increaseTime(600)
         await processAndFulfill(raffle, deployer)
@@ -310,7 +310,7 @@ describe("Raffle", function () {
 
     it("should succeed", async function () {
       // buy 1 ticket
-      await raffle.buy(1)
+      await raffle.buy()
       // await raffle.buy(1)
       // process batch
       // await expect(raffle.claim(1, 1)).to.be.revertedWith("batch not processed yet")
@@ -343,7 +343,7 @@ describe("Raffle", function () {
         // new raffle => batch 1
         const raffle = await newRaffle()
 
-        await Promise.all(accounts.map(acc => raffle.connect(acc).buy(1)))
+        await Promise.all(accounts.map(acc => raffle.connect(acc).buy()))
 
         // process batch
         await processAndFulfill(raffle, deployer)
@@ -365,7 +365,7 @@ describe("Raffle", function () {
           // new raffle => batch 1
 
           // all the accounts buy one ticket
-          await Promise.all(accounts.map(acc => raffle.connect(acc).buy(1)))
+          await Promise.all(accounts.map(acc => raffle.connect(acc).buy()))
           // process batch
           await processAndFulfill(raffle, deployer)
         }
