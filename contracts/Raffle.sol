@@ -32,12 +32,13 @@ contract Raffle is Ownable, WorkerBatch {
 
     RLoot public lootNFT;
 
-    event WinnerClaim(address owner, uint256 batchId);
+    event Winner(address owner, uint256 batchId);
+    event Claimed(address owner, uint256 batchId);
     event TicketSold(address owner, uint256 batchId, uint256 amount);
 
     uint256 public MAX_REQUESTS_PER_BATCH = 5;
 
-        // uint256 fee
+    // uint256 fee
     constructor(
         address lootAddress,
         address oracleAddress,
@@ -83,21 +84,28 @@ contract Raffle is Ownable, WorkerBatch {
             msg.sender
         );
 
-        emit WinnerClaim(msg.sender, batchId);
+        emit Claimed(msg.sender, batchId);
     }
 
-
+    // this shouldnt be here - worker batch should be a separate contract
     function fullfilJob(bytes32 requestId, uint256 randomness)
         public
         override
         onlyOracle
     {
-        // seed % amount of participants == index
-        WinnerData storage winner = winners[currentBatch - 1];
-        uint88 winnerIndex = uint88(randomness % requests[currentBatch - 1].length);
-        winner.index = winnerIndex;
-        winner.winner = requests[currentBatch - 1][winnerIndex];
+        uint256 previousBatch = currentBatch - 1;
+        address winnerAddress = address(0);
+        if (requests[previousBatch].length > 0) {
+            WinnerData storage winner = winners[previousBatch];
+            // index = seed % amount of participants 
+            uint88 winnerIndex = uint88(randomness % requests[previousBatch].length);
+            winner.index = winnerIndex;
+            winner.winner = requests[previousBatch][winnerIndex];
+            winnerAddress = winner.winner;
+        } 
+
         super.fullfilJob(requestId, randomness);
+        emit Winner(winnerAddress, previousBatch);
     }
 
 
