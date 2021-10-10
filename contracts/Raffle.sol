@@ -6,14 +6,11 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import {RLoot} from "./RLoot.sol";
-import {LootProperties} from "./LootProperties.sol";
 import "./WorkerBatch.sol";
 
 import "hardhat/console.sol";
 
 contract Raffle is Ownable, WorkerBatch {
-
-    using LootProperties for Raffle;
 
     struct WinnerData {
         address winner;
@@ -76,10 +73,16 @@ contract Raffle is Ownable, WorkerBatch {
         // set as claimed
         winner.claimed = true;
 
-        lootNFT.mintLoot(
-            LootProperties.makeRareSeed(seed, batchId, msg.sender),
-            msg.sender
+        // 
+        // hash seed, batch and owner address.
+        uint256 properties = uint256(
+            keccak256(abi.encode(seed, batchId, msg.sender))
         );
+        // define max rarity
+        uint8 MAX_RARITY = 0xff;
+        properties = properties | MAX_RARITY;
+        // mint the loot
+        lootNFT.mintLoot(properties, msg.sender);
 
         emit Claimed(msg.sender, batchId);
     }
