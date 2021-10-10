@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-
 import "./ERC1271.sol";
 
 interface IRLoot {
@@ -56,6 +55,8 @@ contract RLoot is
     // map token id => token holder data.
     mapping(uint256 => LootHolder) public holders;
 
+    // todo : destroyed and holders can be packed together.
+
     // base uri for metadata url
     string private _uri;
 
@@ -63,6 +64,7 @@ contract RLoot is
         keccak256(
             "setHolder(address holder,address receiver,uint256 tokenId,uint256 nonce)"
         );
+
 
     event UpdateLoot(uint256 indexed lootId, uint256 properties);
 
@@ -111,7 +113,8 @@ contract RLoot is
         onlyWorker
         returns (bool)
     {
-        require(lootId < loots.length, "destroyLoot: invalid loot id");
+        // check if loot is destroyed
+        require(lootId < loots.length, "invalid loot id");
 
         // is worker holding the token?
         require(isHolding(msg.sender, lootId), "not holding");
@@ -136,7 +139,7 @@ contract RLoot is
         return true;
     }
 
-
+    // fixme : doc
     function setHolder(
         uint256 tokenId,
         address newHolder,
@@ -151,8 +154,9 @@ contract RLoot is
         )
         returns (bool)
     {
-        // set holder and increase nonce
+        // get loot's holder.
         LootHolder memory holder = holders[tokenId];
+        // set holder and increase nonce
         holders[tokenId] = LootHolder({
             holder: newHolder,
             nonce: holder.nonce + 1
@@ -185,7 +189,7 @@ contract RLoot is
 
     // is this really necessary?
     function approveWorker(address worker) public {
-        require(workers[worker], "you can only approve authorized workers");
+        require(workers[worker], "not authorized worker");
         setApprovalForAll(worker, true);
     }
 
@@ -202,7 +206,7 @@ contract RLoot is
         _;
     }
 
-    // NFT metadata
+    // NFT
 
     function setBaseURI(string memory uri) external onlyOwner {
         _uri = uri;
