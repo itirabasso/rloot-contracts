@@ -62,15 +62,16 @@ contract Raffle is Ownable, WorkerBatch {
 
     /// @notice claims batch's prize
     /// @param batchId numer of batch
-    /// @param index index in the batch (this is not necessary)
-    function claim(uint256 batchId, uint256 index) external {
+    function claim(uint256 batchId) external {
         // check if sender is owner of ticket `index` in given batchId
-        require(requests[batchId][index] == msg.sender, "wrong ticket");
+        // require(requests[batchId][index] == msg.sender, "wrong ticket");
         uint256 seed = batches[batchId].seed;
         // the batch hasnt been processed
         require(seed != 0, "batch not processed yet");
         // it's processed => fetch batch's winner
         WinnerData storage winner = winners[batchId];
+        // check the batch's winner index is
+        require(requests[batchId][winner.index] == msg.sender, "you are not the winner");
         // hasnt been claimed
         require(!winner.claimed, "already claimed");
         // set as claimed
