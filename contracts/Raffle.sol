@@ -73,10 +73,11 @@ contract Raffle is Ownable, WorkerBatch {
         onlyOracle
     {
         // seed % amount of participants == index
+        console.log('fulfill %d', currentBatch - 1);
         WinnerData storage winner = winners[currentBatch - 1];
         uint88 winnerIndex = uint88(randomness % requests[currentBatch - 1].length);
-        winner.index = winnerIndex;
-        winner.winner = requests[currentBatch - 1][winnerIndex];
+        winners[currentBatch - 1].index = winnerIndex;
+        winners[currentBatch - 1].winner = requests[currentBatch - 1][winnerIndex];
         super.fullfilJob(requestId, randomness);
     }
 
