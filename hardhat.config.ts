@@ -3,12 +3,8 @@ import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-waffle";
 import "hardhat-typechain";
 import "solidity-coverage"
-// require('./scripts/deploy')
-// require('./scripts/chainlink')
-// require('./scripts/game')
-// require('./scripts/rloot')
-require('./scripts/management')
-// require('./scripts/raffle')
+
+// require('./scripts/management')
 import './scripts/raffle'
 
 import "@nomiclabs/hardhat-etherscan";

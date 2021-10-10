@@ -15,7 +15,6 @@ contract Raffle is Ownable, WorkerBatch {
 
     using LootProperties for Raffle;
 
-
     struct WinnerData {
         address winner;
         uint88 index;
@@ -53,19 +52,39 @@ contract Raffle is Ownable, WorkerBatch {
 
     /// user functions
 
-    // revert when contract is finalizing?
-    function buy(uint256 amount) external {
-        // last participation is not current batch
-        // require(participated[msg.sender] < currentBatch, "already participated");
-        // set participation as current batch
-        // participated[msg.sender] = currentBatch;
+    /// @notice sends pay ether to get one raffle's ticket.
+    function buy() external {
         // add to batch requests.
         requests[currentBatch].push(msg.sender);
         // emit event 
         emit TicketSold(msg.sender, currentBatch, 1);
     }
 
-    // di
+    /// @notice claims batch's prize
+    /// @param batchId numer of batch
+    /// @param index index in the batch (this is not necessary)
+    function claim(uint256 batchId, uint256 index) external {
+        // check if sender is owner of ticket `index` in given batchId
+        require(requests[batchId][index] == msg.sender, "wrong ticket");
+        uint256 seed = batches[batchId].seed;
+        // the batch hasnt been processed
+        require(seed != 0, "batch not processed yet");
+        // it's processed => fetch batch's winner
+        WinnerData storage winner = winners[batchId];
+        // hasnt been claimed
+        require(!winner.claimed, "already claimed");
+        // set as claimed
+        winner.claimed = true;
+
+        // todo : make it rare
+        lootNFT.mintLoot(
+            uint256(keccak256(abi.encode(seed, batchId, msg.sender))),
+            msg.sender
+        );
+
+        emit WinnerClaim(msg.sender, batchId);
+    }
+
 
     function fullfilJob(bytes32 requestId, uint256 randomness)
         public
@@ -80,35 +99,6 @@ contract Raffle is Ownable, WorkerBatch {
         super.fullfilJob(requestId, randomness);
     }
 
-    function claim(uint256 batchId, uint256 index) external {
-        // console.log("Claiming %d - %d", batchId, index);
-        // require(participated[msg.sender] == batchId, "you havent participated");
-        // this index in this batch is the sender
-        require(requests[batchId][index] == msg.sender, "wrong ticket");
-        // the batch hasnt been 
-        uint256 seed = batches[batchId].seed;
-        require(seed != 0, "batch not processed yet");
-        // it's processed => fetch batch winne
-        WinnerData storage winner = winners[batchId];
-        // winner index is correct
-        // require(winner.index == index, "you are not the winner");
-        // winner is not set => hasnt been claimed
-        require(!winner.claimed, "already claimed");
-        // prize claimed
-        winner.claimed = true;
-
-        // we can skip this and just selfdestruct at some point in the future.
-        // delete requests[batchId];
-
-        // todo : make it rare
-        lootNFT.mintLoot(
-            uint256(keccak256(abi.encode(seed, batchId, msg.sender))),
-            msg.sender
-        );
-        // lootNFT.mintLoot(batchId+1, msg.sender);
-
-        emit WinnerClaim(msg.sender, batchId);
-    }
 
     function findIndex(uint256 batchId, address account) external view returns (uint256 index) {
         address[] memory participants = requests[batchId];
