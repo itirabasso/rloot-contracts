@@ -85,7 +85,8 @@ contract RLoot is
         // holders[lootId] = LootHolder({holder: to, nonce: 0});
         // destroyed[lootId] = false;
         // super._mint(to, lootId);
-        return _mintLoot(properties, to, lootId);
+        _mintLoot(properties, to, lootId);
+        emit UpdateLoot(lootId, properties);
     }
 
     function _mintLoot(uint256 properties, address to, uint256 lootId)
@@ -97,7 +98,6 @@ contract RLoot is
         destroyed[lootId] = false;
 
         super._mint(to, lootId);
-
         return lootId;
     }
 
