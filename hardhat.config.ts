@@ -52,6 +52,13 @@ export default {
         mnemonic
       }
     },
+    rinkeby: {
+      url: 'https://eth-rinkeby.alchemyapi.io/v2/63SAsoDt322jm-yUuQ7N-3aAAannBCmI',
+      chainId: 4,
+      accounts: {
+        mnemonic
+      }
+    },
     localhost: {
       url: 'http://localhost:8545',
       chainId: 31337,

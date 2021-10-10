@@ -25,13 +25,13 @@ import { BigNumber, BigNumberish, Contract, Signer, Wallet } from "ethers";
 
 
 // const LINK_ADDRESS = '0xa36085F69e2889c224210F603D836748e7dC0088'
-// const LINK_ADDRESS = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709'
+const LINK_ADDRESS = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709'
 
 const BYTES32_ZEROS = '0x0000000000000000000000000000000000000000000000000000000000000000'
 
 // Mumbai
 // LINK Token
-const LINK_ADDRESS = '0x326C977E6efc84E512bB9C30f76E30c160eD06FB'
+// const LINK_ADDRESS = '0x326C977E6efc84E512bB9C30f76E30c160eD06FB'
 // VRF Coordinator	0x8C7382F9D8f56b33781fE506E897a4F1e2d17255
 // Key Hash	0x6e75b569a01ef56d18cab6a8e71e6600d6ce853834d4a5748b720d06f878b3a4
 // Fee	0.0001 LINK
@@ -87,7 +87,8 @@ describe("Raffle", function () {
   revertAfter()
 
   sharedBeforeEach(async function () {
-    const oracleFee = parseEther('0.0001')
+    // const oracleFee = parseEther('0.0001')
+    const oracleFee = parseEther('0.1')
 
     coordinator = await Coordinator.deploy(LINK_ADDRESS)
     await coordinator.deployed()
@@ -247,6 +248,7 @@ describe("Raffle", function () {
       const index = await raffle.findIndex(1, deployer.address)
       // claim
       await raffle.claim(1, index)
+      const properties = await loot.getProperties(1)
 
       // batch 2
       // // buy a ticket
