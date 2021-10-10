@@ -4,7 +4,7 @@ import "@nomiclabs/hardhat-waffle";
 import "hardhat-typechain";
 import "solidity-coverage"
 
-// require('./scripts/management')
+require('./scripts/management')
 import './scripts/raffle'
 
 import "@nomiclabs/hardhat-etherscan";
