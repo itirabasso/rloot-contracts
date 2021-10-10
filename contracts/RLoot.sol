@@ -83,10 +83,6 @@ contract RLoot is
         returns (uint256)
     {
         uint256 lootId = loots.length;
-        // loots.push(properties);
-        // holders[lootId] = LootHolder({holder: to, nonce: 0});
-        // destroyed[lootId] = false;
-        // super._mint(to, lootId);
         _mintLoot(properties, to, lootId);
         emit UpdateLoot(lootId, properties);
     }
@@ -193,10 +189,11 @@ contract RLoot is
         setApprovalForAll(worker, true);
     }
 
+    // whitelist a worker
     function addWorker(address worker) public onlyOwner {
         workers[worker] = true;
     }
-
+    // removes a worker from the whitelist
     function removeWorker(address worker) public onlyOwner {
         workers[worker] = false;
     }
