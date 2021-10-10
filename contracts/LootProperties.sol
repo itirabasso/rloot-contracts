@@ -75,10 +75,10 @@ library LootProperties {
         returns (LootData memory)
     {
         return LootData({
-            material: getMaterial(value),
+            rarity: getRarity(value),
             color: getColor(value),
-            weight: getWeight(value),
-            rarity: getRarity(value)
+            material: getMaterial(value),
+            weight: getWeight(value)
         });
 
     }
