@@ -27,13 +27,13 @@ contract Looter is WorkerBatch {
         address oracleAddress
         // uint256 cooldown,
         // uint256 fee
-    ) WorkerBatch(oracleAddress) {
+    ) WorkerBatch(oracleAddress, 600) {
         lootNFT = RLoot(lootAddress);
     }
 
     /// user functions
     
-    function request(uint256 amount) external {
+    function buy(uint256 amount) external {
         uint256 batchId;
         require(amount > 0, "empty request");
         // add internal function
