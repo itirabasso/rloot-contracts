@@ -34,7 +34,7 @@ export default {
   networks: {
     hardhat: {
       forking: {
-        url: process.env.ETHEREUM_ARCHIVE_URL,
+        url: archive_node
       },
       accounts: {
         mnemonic

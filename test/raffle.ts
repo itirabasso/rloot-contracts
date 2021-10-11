@@ -1,4 +1,4 @@
-import { expectEventIn, expectRevert, expectToBe, getEventArg, getEventArgFromLogs, increaseTime, parseLogs } from "./utils";
+import { getEventArgFromLogs, increaseTime } from "./utils";
 
 import { BN, constants } from '@openzeppelin/test-helpers'
 // import { setGameContext } from "./context";
@@ -23,8 +23,6 @@ import { OracleMock } from "../typechain/OracleMock";
 import { Fulfiller } from "../typechain/Fulfiller";
 import { BigNumber, BigNumberish, Contract, Signer, Wallet } from "ethers";
 
-
-// const LINK_ADDRESS = '0xa36085F69e2889c224210F603D836748e7dC0088'
 const LINK_ADDRESS = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709'
 
 const BYTES32_ZEROS = '0x0000000000000000000000000000000000000000000000000000000000000000'
@@ -51,10 +49,6 @@ describe("Raffle", function () {
   let Coordinator: VRFCoordinatorMock__factory
   let Fulfiller: Fulfiller__factory
 
-  // libraries
-  // let LootPropertiesLibrary: LootProperties__factory
-  // let properties: LootProperties
-
   // contracts
   let coordinator: VRFCoordinatorMock
   let fulfiller: Fulfiller
@@ -69,16 +63,10 @@ describe("Raffle", function () {
     admin = accounts[1]
     user = accounts[2]
     anotherUser = accounts[3]
-    // rndAccount = Wallet.createRandom().connect(ethers.provider)
-    // await delegate.sendTransaction({
-    //   to: owner.address,
-    //   value: parseEther('300') //(await delegate.getBalance()).mul(9).div(10),
-    // })
+
     snapshotId = await takeSnapshot(network.provider)
     Loot = new RLoot__factory(deployer)
     Oracle = new OracleMock__factory(deployer)
-    // LootPropertiesLibrary = new LootProperties__factory(deployer)
-    // properties = await LootPropertiesLibrary.deploy()
     Raffle = new Raffle__factory(deployer)
     Coordinator = new VRFCoordinatorMock__factory(deployer)
     Fulfiller = new Fulfiller__factory(deployer)
@@ -98,7 +86,10 @@ describe("Raffle", function () {
     await fulfiller.deployed()
     console.log('Fulfiller address', fulfiller.address)
 
-    link = await ethers.getContractAt('@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20', LINK_ADDRESS) as IERC20;
+    link = await ethers.getContractAt(
+      '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
+      LINK_ADDRESS
+    ) as IERC20;
 
     oracle = await Oracle.deploy(oracleFee)
     await oracle.deployed()
@@ -117,7 +108,6 @@ describe("Raffle", function () {
     const requestId = getEventArgFromLogs(
       coordinator,
       receipt.logs,
-      // receipt.logs.filter(l => l.address === contract.address),
       "RandomnessRequest",
       "requestId"
     );

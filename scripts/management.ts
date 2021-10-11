@@ -1,6 +1,5 @@
 import { parseEther } from "ethers/lib/utils";
 import { task } from "hardhat/config";
-import { deploy } from "./utils";
 import fs from "fs";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
